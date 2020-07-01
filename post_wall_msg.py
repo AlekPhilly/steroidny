@@ -118,12 +118,13 @@ def get_wall_posts(count):
 
 def main():
     request_string = 'бодибилдинг звезда чемпион'
-    start_datetime = datetime.datetime(2020, 7, 18, 20, 0, 0)
-    for day in range(10):
-        photo_path = grab_pics_from_yandex(request_string)
+    start_datetime = datetime.datetime(2020, 7, 31, 20, 0, 0)
+    days = 3
+
+    photo_paths = grab_pics_from_yandex(days, request_string)
+    for day, photo in enumerate(photo_paths):
         publish_date = calc_publish_date(start_datetime, day)
-        publish_photo(photo_path, publish_date, message='Мужик дня')
-        time.sleep(30)
+        publish_photo(photo, publish_date, message='Мужик дня')
 
 if __name__ == '__main__':
     main()
