@@ -12,7 +12,7 @@ def get_numbers_of_pages_to_scan(pics_quantity):
 
     return choices(list(range(start_page_num, start_page_num + pages_span)), k=pics_quantity)
 
-def grab_pics_from_yandex(quantity, request_string='фитнес бикини фото'):
+def grab_pics_from_yandex(quantity, request_string):
 
     yandex_search_url = '''https://yandex.ru/images/search?text=
     %D1%84%D0%B8%D1%82%D0%BD%D0%B5%D1%81%20%D0%B1%D0%B8%D0%BA%D0%B
