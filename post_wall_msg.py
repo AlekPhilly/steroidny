@@ -7,18 +7,24 @@ import sys
 from pathlib import Path
 
 
+ID = Path('input.txt').read_text().splitlines()[0]
+TOKEN = Path('input.txt').read_text().splitlines()[1]
+REQUEST = Path('input.txt').read_text().splitlines()[2]
+MESSAGE = Path('input.txt').read_text().splitlines()[3]
+
 def build_vk_api_url(method, method_query):
     '''
     build vk api url for steroid dudes
     method <str> - method name
     method query <dict> - method query params
     '''
+    global TOKEN
+    
     api_url = URL('https://api.vk.com/method/')
     # token with access to the wall and photos, unlimited due date
-    token = 'c59ffe28c1e55f0aae5fa0e00fde42071b40384bf2fabccafa85f7deaf0908ec6ec970c04ccf633a48ecf'
-
+    
     access = {
-    'access_token': token,
+    'access_token': TOKEN,
     'v': '5.120'
     }
 
@@ -52,14 +58,12 @@ def publish_photo(photo_path, publish_date, message='Картинка дня'):
     message <str>: message text
     publish_date <str(unixtime)>: publish_date
     '''
-    # upload photo
-    # app_id = 7526955
-    # get upload server's address
+    global ID
 
     method = 'photos.getWallUploadServer'
 
     method_query = {
-        'group_id': '2798'
+        'group_id': ID
     }
 
     upload_server_url = build_vk_api_url(method, method_query)
@@ -75,7 +79,7 @@ def publish_photo(photo_path, publish_date, message='Картинка дня'):
 
     method = 'photos.saveWallPhoto'
     save_photo_params = {
-        'group_id': '2798',
+        'group_id': ID,
         'photo': upload_photo['photo'],
         'server': upload_photo['server'],
         'hash': upload_photo['hash']
@@ -89,7 +93,7 @@ def publish_photo(photo_path, publish_date, message='Картинка дня'):
     method = 'wall.post'
 
     method_query = {
-        'owner_id': '-2798',
+        'owner_id': '-' + ID,
         'from_group': '1',
         'message': message,
         'attachments': f'photo{owner_id}_{photo_id}'
@@ -107,7 +111,7 @@ def get_wall_posts(count):
     method = 'wall.get'
 
     method_query = {
-        'owner_id': '-2798',
+        'owner_id': '-' + ID,
         'count': str(count)
     }
 
@@ -126,7 +130,11 @@ def remove_pics():
     return
 
 def main(days=5, delay=1):
-    request_string = 'бодибилдинг девушки бикини модель сексуальные'
+
+    global REQUEST
+    global MESSAGE
+    
+    request_string = REQUEST
     start_date = datetime.date.today() + datetime.timedelta(days=delay)
     start_time = datetime.time(9, 0)
     start_datetime = datetime.datetime.combine(start_date, start_time)
@@ -136,7 +144,7 @@ def main(days=5, delay=1):
     for day, photo in enumerate(photo_paths):
         publish_date = calc_publish_date(start_datetime, day)
         try: # TODO: fix function to accept bad vk response 
-            publish_photo(photo, publish_date, message='Девушка дня')
+            publish_photo(photo, publish_date, message=MESSAGE)
             print(f'published {photo} on {datetime.datetime.fromtimestamp(float(publish_date))}')
         except KeyError as e:
             continue
