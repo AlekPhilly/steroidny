@@ -10,7 +10,7 @@ Finds random pictures at **"Yandex Pictures"** based on query *(change in grab_p
 >> 1. Your group number
 >> 2. Your app token
 >> 3. Query string for image searching
->> 4. Phrase to post with images
+>> 4. Phrase to post with images  
 >> *Visit https://dev.vk.com/ for vk app registration details*
 
 Tested with python ver. 3.9.7  
