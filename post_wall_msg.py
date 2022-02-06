@@ -3,6 +3,8 @@ import time
 import requests
 from yarl import URL
 from grab_pics import grab_pics_from_yandex
+import sys
+from pathlib import Path
 
 
 def build_vk_api_url(method, method_query):
@@ -116,16 +118,40 @@ def get_wall_posts(count):
     
     return content
 
-def main():
-    request_string = 'бодибилдинг звезда чемпион'
-    start_datetime = datetime.datetime(2020, 7, 31, 20, 0, 0)
-    days = 3
+def remove_pics():
+    files = Path().glob('*.png')
+    for file in files:
+        file.unlink()
+
+    return
+
+def main(days=5, delay=1):
+    request_string = 'бодибилдинг девушки бикини модель сексуальные'
+    start_date = datetime.date.today() + datetime.timedelta(days=delay)
+    start_time = datetime.time(9, 0)
+    start_datetime = datetime.datetime.combine(start_date, start_time)
 
     photo_paths = grab_pics_from_yandex(days, request_string)
+    print()
     for day, photo in enumerate(photo_paths):
         publish_date = calc_publish_date(start_datetime, day)
-        publish_photo(photo, publish_date, message='Мужик дня')
+        try: # TODO: fix function to accept bad vk response 
+            publish_photo(photo, publish_date, message='Девушка дня')
+            print(f'published {photo} on {datetime.datetime.fromtimestamp(float(publish_date))}')
+        except KeyError as e:
+            continue
+       # time.sleep(1)
+    return
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) == 3:
+        days = int(sys.argv[1])
+        delay = int(sys.argv[2])
+    elif len(sys.argv) == 2:
+        days = int(sys.argv[1])
+        delay = 1
 
+    main(days, delay)
+    remove_pics()
+
+# TODO: force function to post pics from the hard drive
