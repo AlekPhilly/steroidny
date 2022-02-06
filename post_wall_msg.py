@@ -133,7 +133,7 @@ def main(days=5, delay=1):
 
     global REQUEST
     global MESSAGE
-    
+
     request_string = REQUEST
     start_date = datetime.date.today() + datetime.timedelta(days=delay)
     start_time = datetime.time(9, 0)
@@ -148,7 +148,8 @@ def main(days=5, delay=1):
             print(f'published {photo} on {datetime.datetime.fromtimestamp(float(publish_date))}')
         except KeyError as e:
             continue
-       # time.sleep(1)
+    remove_pics()    
+    
     return
 
 if __name__ == '__main__':
@@ -160,6 +161,3 @@ if __name__ == '__main__':
         delay = 1
 
     main(days, delay)
-    remove_pics()
-
-# TODO: force function to post pics from the hard drive
