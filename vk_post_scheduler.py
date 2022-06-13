@@ -25,21 +25,26 @@ def gen_request(main_word, kind, keywords, kw_sample_len=3):
             + ' '.join(sample(keywords, kw_sample_len)))
 
 
-def refresh_postponed_posts(days_to_cover=7, img_folder='./images'):
+def get_images(quantity, img_folder):
 
     PAGES_FOR_IMG_SEARCH_QTY = 3
+
+    Path(img_folder).mkdir(exist_ok=True)
+
+    imgs = list(Path(img_folder).glob('*.png'))
+    if not imgs or len(imgs) < quantity * 2:
+        grab_pics_from_yandex(PAGES_FOR_IMG_SEARCH_QTY, img_folder)
+
+    return sample(imgs, quantity)
+
+
+def refresh_postponed_posts(days_to_cover=7, img_folder='./images'):
 
     start_date = datetime.date.today() + datetime.timedelta(days=1)
     start_time = datetime.time(9, 0)
     start_datetime = datetime.datetime.combine(start_date, start_time)
 
-    Path(img_folder).mkdir(exist_ok=True)
-
-    imgs = list(Path(img_folder).glob('*.png'))
-    if not imgs or len(imgs) < days_to_cover * 2:
-        grab_pics_from_yandex(PAGES_FOR_IMG_SEARCH_QTY, img_folder)
-
-    imgs = sample(imgs, days_to_cover)
+    imgs = get_images(days_to_cover, img_folder)
 
     post_dates = check_postponed_posts_dates(days_to_cover)
 
