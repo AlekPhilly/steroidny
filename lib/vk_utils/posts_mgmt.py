@@ -1,16 +1,9 @@
+import imp
+import requests
 import datetime
 import time
-import requests
 from yarl import URL
-from grab_pics import grab_pics_from_yandex
-import sys
-from pathlib import Path
-
-
-ID = Path('input.txt').read_text().splitlines()[0]
-TOKEN = Path('input.txt').read_text().splitlines()[1]
-REQUEST = Path('input.txt').read_text().splitlines()[2]
-MESSAGE = Path('input.txt').read_text().splitlines()[3]
+from ..constants import ID, TOKEN
 
 def build_vk_api_url(method, method_query):
     '''
@@ -18,7 +11,6 @@ def build_vk_api_url(method, method_query):
     method <str> - method name
     method query <dict> - method query params
     '''
-    global TOKEN
     
     api_url = URL('https://api.vk.com/method/')
     # token with access to the wall and photos, unlimited due date
@@ -39,6 +31,38 @@ def build_vk_api_url(method, method_query):
 
     return URL.build(**url_kwargs)
 
+
+def get_postponed_posts(count):
+    
+    method = 'wall.get'
+
+    method_query = {
+        'owner_id': '-' + ID,
+        'count': str(count),
+        'filter': 'postponed'
+    }
+
+    wall_get_url = build_vk_api_url(method, method_query)
+
+    wall_posts = requests.get(wall_get_url)
+    content = wall_posts.json()
+    
+    return content
+
+
+def check_postponed_posts_dates(count):
+
+    posts = get_postponed_posts(count)
+    try:
+        post_dates = [datetime.date.fromtimestamp(post['date'])
+                        for post in posts['response']['items']]
+    except IndexError:
+        print('no postponed posts')
+        return None
+    
+    return post_dates
+
+
 def calc_publish_date(start_datetime=None, shift_days=0):
 
     if not start_datetime:
@@ -49,6 +73,7 @@ def calc_publish_date(start_datetime=None, shift_days=0):
 
     return publish_date
 
+
 def publish_photo(photo_path, publish_date, message='Картинка дня'):
     '''
     Schedule photo publishing to the wall of the 
@@ -58,8 +83,7 @@ def publish_photo(photo_path, publish_date, message='Картинка дня'):
     message <str>: message text
     publish_date <str(unixtime)>: publish_date
     '''
-    global ID
-
+ 
     method = 'photos.getWallUploadServer'
 
     method_query = {
@@ -105,59 +129,3 @@ def publish_photo(photo_path, publish_date, message='Картинка дня'):
     # publish post
     wall_post_get_url = build_vk_api_url(method, method_query)
     requests.get(wall_post_get_url)
-
-def get_wall_posts(count):
-    
-    method = 'wall.get'
-
-    method_query = {
-        'owner_id': '-' + ID,
-        'count': str(count)
-    }
-
-    wall_get_url = build_vk_api_url(method, method_query)
-
-    wall_posts = requests.get(wall_get_url)
-    content = wall_posts.json()
-    
-    return content
-
-def remove_pics():
-    files = Path().glob('*.png')
-    for file in files:
-        file.unlink()
-
-    return
-
-def main(days=5, delay=1):
-
-    global REQUEST
-    global MESSAGE
-
-    request_string = REQUEST
-    start_date = datetime.date.today() + datetime.timedelta(days=delay)
-    start_time = datetime.time(9, 0)
-    start_datetime = datetime.datetime.combine(start_date, start_time)
-
-    photo_paths = grab_pics_from_yandex(days, request_string)
-    print()
-    for day, photo in enumerate(photo_paths):
-        publish_date = calc_publish_date(start_datetime, day)
-        try: # TODO: fix function to accept bad vk response 
-            publish_photo(photo, publish_date, message=MESSAGE)
-            print(f'published {photo} on {datetime.datetime.fromtimestamp(float(publish_date))}')
-        except KeyError as e:
-            continue
-    remove_pics()    
-    
-    return
-
-if __name__ == '__main__':
-    if len(sys.argv) == 3:
-        days = int(sys.argv[1])
-        delay = int(sys.argv[2])
-    elif len(sys.argv) == 2:
-        days = int(sys.argv[1])
-        delay = 1
-
-    main(days, delay)

@@ -1,7 +1,10 @@
 __pycache__/*
 .vscode/*
+images/*
 
 input.txt
 *.png
 *.log
 *.sh
+*.ipynb
+*.pyc
