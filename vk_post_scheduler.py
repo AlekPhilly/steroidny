@@ -57,7 +57,7 @@ def refresh_postponed_posts(days_to_cover=7, img_folder='./images'):
 
 
 def main():
-    refresh_postponed_posts(15)
+    refresh_postponed_posts()
 
 
 if __name__ == '__main__':
