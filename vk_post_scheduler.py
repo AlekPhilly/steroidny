@@ -32,8 +32,10 @@ def get_images(quantity, img_folder):
     Path(img_folder).mkdir(exist_ok=True)
 
     imgs = list(Path(img_folder).glob('*.png'))
+    
     if not imgs or len(imgs) < quantity * 2:
         grab_pics_from_yandex(PAGES_FOR_IMG_SEARCH_QTY, img_folder)
+        imgs = list(Path(img_folder).glob('*.png'))
 
     return sample(imgs, quantity)
 
