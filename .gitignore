@@ -3,6 +3,7 @@ __pycache__/*
 images/*
 
 input.txt
+get_token_url.txt
 *.png
 *.log
 *.sh

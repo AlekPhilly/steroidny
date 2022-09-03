@@ -1,7 +1,7 @@
 import datetime
 from random import sample, choice
 from pathlib import Path
-from lib import ID, TOKEN, MESSAGE, REQUEST_PARAMS
+from lib import MESSAGE, REQUEST_PARAMS
 from lib import get_img_links, download_imgs
 from lib import check_postponed_posts_dates, calc_publish_date, publish_photo
 
@@ -32,7 +32,7 @@ def get_images(quantity, img_folder):
     Path(img_folder).mkdir(exist_ok=True)
 
     imgs = list(Path(img_folder).glob('*.png'))
-    
+
     if not imgs or len(imgs) < quantity * 2:
         grab_pics_from_yandex(PAGES_FOR_IMG_SEARCH_QTY, img_folder)
         imgs = list(Path(img_folder).glob('*.png'))
@@ -60,7 +60,9 @@ def refresh_postponed_posts(days_to_cover=7, img_folder='./images'):
                 print(f'published {photo} on {datetime.datetime.fromtimestamp(float(publish_date))}')
                 photo.unlink()
             except Exception as e:
-                continue
+                print('Got an exception:', e)
+                raise
+                # continue
 
 
 def main():

@@ -3,6 +3,7 @@ from pathlib import Path
 
 ID = Path('./input.txt').read_text().splitlines()[0]
 TOKEN = Path('./input.txt').read_text().splitlines()[1]
+VERSION = Path('./input.txt').read_text().splitlines()[2]
 
 MESSAGE = 'Девушка дня'
 

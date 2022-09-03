@@ -1,11 +1,11 @@
-import imp
 import requests
 import datetime
 import time
+import sys
 from yarl import URL
-from ..constants import ID, TOKEN
+from ..constants import ID, TOKEN, VERSION
 
-def build_vk_api_url(method, method_query):
+def build_vk_api_url(method: str, method_query: dict) -> URL:
     '''
     build vk api url for steroid dudes
     method <str> - method name
@@ -13,11 +13,10 @@ def build_vk_api_url(method, method_query):
     '''
     
     api_url = URL('https://api.vk.com/method/')
-    # token with access to the wall and photos, unlimited due date
     
     access = {
     'access_token': TOKEN,
-    'v': '5.120'
+    'v': VERSION
     }
 
     query = {**method_query, **access}
@@ -59,6 +58,10 @@ def check_postponed_posts_dates(count):
     except IndexError:
         print('no postponed posts')
         return None
+    except KeyError: 
+        # got an error (response has no 'response' field)
+        print(posts['error']['error_msg'])
+        sys.exit(1)
     
     return post_dates
 
@@ -93,7 +96,12 @@ def publish_photo(photo_path, publish_date, message='Картинка дня'):
     upload_server_url = build_vk_api_url(method, method_query)
     upload_server = requests.get(upload_server_url)
 
-    url = upload_server.json()['response']['upload_url']
+    try:
+        url = upload_server.json()['response']['upload_url']
+    except KeyError:
+        print("Can't upload photo: ", end='')
+        print(upload_server.json()['error']['error_msg'])
+        sys.exit(1)
 
     photo = {
         'file': open(photo_path, 'rb')
